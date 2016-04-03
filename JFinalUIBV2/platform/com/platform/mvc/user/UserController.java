@@ -1,5 +1,6 @@
 package com.platform.mvc.user;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import org.apache.log4j.Logger;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.aop.Before;
 import com.platform.constant.ConstantInit;
+import com.platform.constant.ConstantLogin;
 import com.platform.dto.ZtreeNode;
 import com.platform.mvc.base.BaseController;
 import com.platform.mvc.login.LoginService;
@@ -57,11 +59,19 @@ public class UserController extends BaseController {
 	
 		User user = getModel(User.class);
 		UserInfo userInfo = getModel(UserInfo.class);
-		Map map=UserService.service.req(user, password, email,userInfo);
+		boolean authCode = authCode(); // 验证验证码
+		Map map=new HashMap();
+		if(authCode){
+			Map backmap=UserService.service.req(user, password, email,userInfo);
+			 renderJson(JSONObject.toJSON(backmap).toString());
+		}else{
+			map.put("url", "");
+			map.put("info", "");
+			map.put("status", 0);
+			map.put("error", "验证码错误");
+			renderJson(JSONObject.toJSON(map).toString());
+		}
 		
-		//String jsonText=map.toString();
-		renderJson(JSONObject.toJSON(map).toString());
-		//render("/platform/user/add.html");
 		
 	}
 	
